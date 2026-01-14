@@ -14,7 +14,7 @@ databaseChangeLog:
                   value: Finish math and science homework
               - column:
                   name: deadline
-                  value: 2026-12-01
+                  value: 2026-12-01T00:00
               - column:
                   name: status
                   value: PENDING
@@ -32,7 +32,7 @@ databaseChangeLog:
                   value: Resolve critical issue on production server
               - column:
                   name: deadline
-                  value: 2026-11-25
+                  value: 2026-11-25T00:00
               - column:
                   name: status
                   value: IN_PROGRESS
