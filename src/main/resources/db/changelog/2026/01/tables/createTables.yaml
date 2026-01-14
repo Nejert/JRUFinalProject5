@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: users/createUsersTables.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: tasks/tasks.yaml
+      relativeToChangelogFile: true

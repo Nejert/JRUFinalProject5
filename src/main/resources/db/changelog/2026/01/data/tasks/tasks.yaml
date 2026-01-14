@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-tasks-tasks
+      author: ikazakov
+      changes:
+        - insert:
+            tableName: tasks
+            columns:
+              - column:
+                  name: title
+                  value: Complete homework
+              - column:
+                  name: description
+                  value: Finish math and science homework
+              - column:
+                  name: deadline
+                  value: 2026-12-01
+              - column:
+                  name: status
+                  value: PENDING
+              - column:
+                  name: user_id
+                  value: 1
+        - insert:
+            tableName: tasks
+            columns:
+              - column:
+                  name: title
+                  value: Fix server
+              - column:
+                  name: description
+                  value: Resolve critical issue on production server
+              - column:
+                  name: deadline
+                  value: 2026-11-25
+              - column:
+                  name: status
+                  value: IN_PROGRESS
+              - column:
+                  name: user_id
+                  value: 2

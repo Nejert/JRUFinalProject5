@@ -1,0 +1,65 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-users-users
+      author: ikazakov
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: login
+                  value: admin
+              - column:
+                  name: password
+                  value: admin
+              - column:
+                  name: email
+                  value: admin@admin.com
+              - column:
+                  name: role_id
+                  value: 1
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: login
+                  value: user
+              - column:
+                  name: password
+                  value: user
+              - column:
+                  name: email
+                  value: user@user.com
+              - column:
+                  name: role_id
+                  value: 2
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: login
+                  value: test
+              - column:
+                  name: password
+                  value: test
+              - column:
+                  name: email
+                  value: test@test.com
+              - column:
+                  name: role_id
+                  value: 2
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: login
+                  value: some
+              - column:
+                  name: password
+                  value: some
+              - column:
+                  name: email
+                  value: some@some.com
+              - column:
+                  name: role_id
+                  value: 2

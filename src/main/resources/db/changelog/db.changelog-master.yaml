@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: 2026/01/initialDBStateCreation.yaml
+      relativeToChangelogFile: true
+
