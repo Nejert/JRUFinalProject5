@@ -1,96 +1,92 @@
 package com.javarush.jrufinalproject5.repository;
 
+import com.javarush.jrufinalproject5.config.Container;
+import com.javarush.jrufinalproject5.entity.Role;
 import com.javarush.jrufinalproject5.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
-import static com.javarush.jrufinalproject5.entity.Role.USER;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Testcontainers
-public class UserRepositoryTest {
-
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:latest");
+public class UserRepositoryTest extends Container {
     @Autowired
     private UserRepository userRepository;
-    private final List<User> initialUsersList = InitialDataBaseEntities.getInitialUsersList();
 
     @Test
     void findAllTest() {
         List<User> all = userRepository.findAll();
-        assertEquals(initialUsersList, all);
+        assertEquals(InitialDataBaseEntities.USERS, all);
     }
 
     @Test
     void findByIdTest() {
         User user = userRepository.findById(1L).orElseThrow();
-        assertEquals(initialUsersList.get(0), user);
+        assertEquals(InitialDataBaseEntities.ADMIN, user);
     }
 
     @Test
     void findByLoginTest() {
-        String adminEmail = initialUsersList.get(0).getEmail();
-        Optional<User> adminOpt = userRepository.findByLogin("admin");
-        User admin = adminOpt.orElseThrow();
+        User admin = userRepository.findByLogin("admin").orElseThrow();
         assertNotNull(admin);
-        assertEquals(adminEmail, admin.getEmail());
+        assertEquals(InitialDataBaseEntities.ADMIN, admin);
     }
 
     @Test
     void saveUserTest() {
-        User testUser = InitialDataBaseEntities.getUser("testUser");
-        User saved = userRepository.save(testUser);
-        User test = userRepository.findById(saved.getId()).orElseThrow();
+        User testUser = getUser("saveUserTest");
+        Long savedId = userRepository.save(testUser).getId();
+        User test = userRepository.findById(savedId).orElseThrow();
         assertNotNull(test);
         assertEquals(testUser, test);
         List<User> list = userRepository.findAll();
-        assertEquals(initialUsersList.size() + 1, list.size());
+        assertEquals(InitialDataBaseEntities.USERS.size() + 1, list.size());
+        deleteFromDB(test);
     }
 
     @Test
     void updateUserTest() {
-        User testUser = InitialDataBaseEntities.getUser("testUser");
-        User testUserJohn = InitialDataBaseEntities.getUser("testUserJohn");
+        User testUser = getUser("updateUserTest");
         long savedId = userRepository.save(testUser).getId();
         User test = userRepository.findById(savedId).orElseThrow();
         assertNotNull(test);
-        test.setLogin(testUserJohn.getLogin());
-        test.setPassword(testUserJohn.getPassword());
-        test.setRole(USER);
+        test.setLogin("login");
+        test.setRole(Role.USER);
         userRepository.save(test);
-
         User user = userRepository.findById(savedId).orElseThrow();
-        assertEquals(testUserJohn.getLogin(), user.getLogin());
-        assertEquals(testUserJohn.getPassword(), user.getPassword());
-        assertEquals(testUserJohn.getEmail(), user.getEmail());
-        assertEquals(testUserJohn.getRole(), user.getRole());
+        assertEquals("login", user.getLogin());
+        assertEquals(Role.USER, user.getRole());
+        deleteFromDB(user);
     }
 
     @Test
     void deleteUserTest() {
-        User testUser = InitialDataBaseEntities.getUser("testUser");
-        long savedId = userRepository.save(testUser).getId();
+        User testUser = getUser("deleteUserTest");
+        User saved = userRepository.save(testUser);
         List<User> list = userRepository.findAll();
-        assertNotEquals(initialUsersList, list);
-        assertEquals(initialUsersList.size() + 1, list.size());
-        userRepository.deleteById(savedId);
+        assertNotEquals(InitialDataBaseEntities.USERS, list);
+        assertEquals(InitialDataBaseEntities.USERS.size() + 1, list.size());
+        deleteFromDB(saved);
         list = userRepository.findAll();
-        assertEquals(initialUsersList, list);
+        assertEquals(InitialDataBaseEntities.USERS, list);
+    }
+
+    private User getUser(String login) {
+        return new User(
+                null,
+                login,
+                login,
+                "test@user.com",
+                Role.ADMIN, null);
+    }
+
+    private void deleteFromDB(User user) {
+        userRepository.deleteById(user.getId());
         assertThrows(NoSuchElementException.class, () ->
-                userRepository.findByLogin(testUser.getLogin()).orElseThrow());
+                userRepository.findByLogin(user.getLogin()).orElseThrow());
     }
 }

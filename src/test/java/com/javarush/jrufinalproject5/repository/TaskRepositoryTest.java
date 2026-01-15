@@ -1,87 +1,93 @@
 package com.javarush.jrufinalproject5.repository;
 
+import com.javarush.jrufinalproject5.config.Container;
 import com.javarush.jrufinalproject5.entity.Task;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
-import org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@Testcontainers
-public class TaskRepositoryTest {
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer<?> postgresContainer = new PostgreSQLContainer<>("postgres:latest");
+public class TaskRepositoryTest extends Container {
     @Autowired
     private TaskRepository taskRepository;
-    private final List<Task> initialTasksList = InitialDataBaseEntities.getInitialTasksList();
 
     @Test
     void findAllTest() {
         List<Task> all = taskRepository.findAll();
-        assertEquals(initialTasksList, all);
+        assertEquals(InitialDataBaseEntities.TASKS, all);
     }
 
     @Test
     void findByIdTest() {
         Task task = taskRepository.findById(1L).orElseThrow();
-        assertEquals(initialTasksList.get(0), task);
+        assertEquals(InitialDataBaseEntities.HOMEWORK, task);
     }
 
     @Test
     void findByUserIdTest() {
         List<Task> tasks = taskRepository.findByUserId(1L);
         assertNotNull(tasks);
-        List<Task> expected = List.of(InitialDataBaseEntities.getTask("homework"));
+        List<Task> expected = List.of(InitialDataBaseEntities.HOMEWORK);
         assertEquals(expected, tasks);
     }
 
     @Test
     void saveTaskTest() {
-        Task testTask = InitialDataBaseEntities.getTask("testTask");
+        Task testTask = getTask("saveTaskTest");
         Task saved = taskRepository.save(testTask);
         Task dbTestTask = taskRepository.findById(saved.getId()).orElseThrow();
         assertNotNull(dbTestTask);
         assertEquals(testTask, dbTestTask);
         List<Task> list = taskRepository.findAll();
-        assertEquals(initialTasksList.size() + 1, list.size());
+        assertEquals(InitialDataBaseEntities.TASKS.size() + 1, list.size());
+        deleteFromDB(saved);
     }
+
     @Test
     void updateTaskTest() {
-        Task testTask = InitialDataBaseEntities.getTask("testTask");
-        long savedId = taskRepository.save(testTask).getId();
-        Task test = taskRepository.findById(savedId).orElseThrow();
+        Task testTask = getTask("updateTaskTest");
+        Task saved = taskRepository.save(testTask);
+        Task test = taskRepository.findById(saved.getId()).orElseThrow();
         assertNotNull(test);
         String newStatus = "COMPLETED";
         test.setStatus(newStatus);
         taskRepository.save(test);
 
-        Task task = taskRepository.findById(savedId).orElseThrow();
+        Task task = taskRepository.findById(saved.getId()).orElseThrow();
         assertEquals(newStatus, task.getStatus());
+        deleteFromDB(task);
     }
 
     @Test
     void deleteTaskTest() {
-        Task testTask = InitialDataBaseEntities.getTask("testTask");
-        long savedId = taskRepository.save(testTask).getId();
+        Task testTask = getTask("deleteTaskTest");
+        Task saved = taskRepository.save(testTask);
         List<Task> all = taskRepository.findAll();
-        assertNotEquals(initialTasksList, all);
-        assertEquals(initialTasksList.size() + 1, all.size());
-        taskRepository.deleteById(savedId);
+        assertNotEquals(InitialDataBaseEntities.TASKS, all);
+        assertEquals(InitialDataBaseEntities.TASKS.size() + 1, all.size());
+        deleteFromDB(saved);
         all = taskRepository.findAll();
-        assertEquals(initialTasksList, all);
+        assertEquals(InitialDataBaseEntities.TASKS, all);
+    }
+
+    private Task getTask(String title) {
+        return new Task(
+                null,
+                title,
+                title,
+                LocalDateTime.parse("2026-01-01T00:00:00"),
+                "SOME_STATUS", InitialDataBaseEntities.ADMIN);
+    }
+
+    private void deleteFromDB(Task task){
+        taskRepository.deleteById(task.getId());
         assertThrows(NoSuchElementException.class, () ->
-                taskRepository.findById(savedId).orElseThrow());
+                taskRepository.findById(task.getId()).orElseThrow());
     }
 }
