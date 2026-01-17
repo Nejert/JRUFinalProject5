@@ -5,6 +5,7 @@ import com.javarush.jrufinalproject5.entity.Task;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,29 +20,39 @@ public class TaskRepositoryTest extends Container {
 
     @Test
     void findAllTest() {
+        // When
         List<Task> all = taskRepository.findAll();
+        // Then
         assertEquals(InitialDataBaseEntities.TASKS, all);
     }
 
     @Test
     void findByIdTest() {
+        // When
         Task task = taskRepository.findById(1L).orElseThrow();
+        // Then
         assertEquals(InitialDataBaseEntities.HOMEWORK, task);
     }
 
     @Test
     void findByUserIdTest() {
-        List<Task> tasks = taskRepository.findByUserId(1L);
-        assertNotNull(tasks);
+        // Given
         List<Task> expected = List.of(InitialDataBaseEntities.HOMEWORK);
+        // When
+        List<Task> tasks = taskRepository.findByUserId(1L);
+        // Then
+        assertNotNull(tasks);
         assertEquals(expected, tasks);
     }
 
     @Test
     void saveTaskTest() {
+        // Given
         Task testTask = getTask("saveTaskTest");
+        // When
         Task saved = taskRepository.save(testTask);
         Task dbTestTask = taskRepository.findById(saved.getId()).orElseThrow();
+        // Then
         assertNotNull(dbTestTask);
         assertEquals(testTask, dbTestTask);
         List<Task> list = taskRepository.findAll();
@@ -51,11 +62,14 @@ public class TaskRepositoryTest extends Container {
 
     @Test
     void updateTaskTest() {
+        // Given
         Task testTask = getTask("updateTaskTest");
+        String newStatus = "COMPLETED";
+        // When
         Task saved = taskRepository.save(testTask);
         Task test = taskRepository.findById(saved.getId()).orElseThrow();
+        // Then
         assertNotNull(test);
-        String newStatus = "COMPLETED";
         test.setStatus(newStatus);
         taskRepository.save(test);
 
@@ -66,9 +80,12 @@ public class TaskRepositoryTest extends Container {
 
     @Test
     void deleteTaskTest() {
+        // Given
         Task testTask = getTask("deleteTaskTest");
+        // When
         Task saved = taskRepository.save(testTask);
         List<Task> all = taskRepository.findAll();
+        // Then
         assertNotEquals(InitialDataBaseEntities.TASKS, all);
         assertEquals(InitialDataBaseEntities.TASKS.size() + 1, all.size());
         deleteFromDB(saved);

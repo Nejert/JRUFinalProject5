@@ -25,4 +25,5 @@ public class TaskIn {
     private String description;
     private LocalDateTime deadline;
     private String status;
+    private Long userId;
 }

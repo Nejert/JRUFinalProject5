@@ -1,6 +1,7 @@
 package com.javarush.jrufinalproject5.service;
 
 import com.javarush.jrufinalproject5.dto.UserDto;
+import com.javarush.jrufinalproject5.dto.user.PatchUserIn;
 import com.javarush.jrufinalproject5.dto.user.UserIn;
 import com.javarush.jrufinalproject5.dto.user.UserOut;
 import com.javarush.jrufinalproject5.entity.Role;
@@ -53,10 +54,8 @@ class UserServiceTest {
     void getAllUsersTest() {
         // Given
         when(userRepository.findAll()).thenReturn(List.of(first, second));
-
         // When
         List<UserOut> result = userService.getAllUsers();
-
         // Then
         assertThat(result).hasSize(2);
         assertThat(result.get(0)).isEqualTo(firstOut);
@@ -81,7 +80,6 @@ class UserServiceTest {
     void findByIdExceptionTest() {
         // Given
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
-
         // When & Then
         assertThrows(NoSuchElementException.class, () -> userService.findById(1L));
     }
@@ -90,10 +88,8 @@ class UserServiceTest {
     void createUserTest() {
         // Given
         when(userRepository.save(third)).thenReturn(third);
-
         // When
         UserOut result = userService.createUser(thirdIn);
-
         // Then
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(thirdOut);
@@ -104,15 +100,12 @@ class UserServiceTest {
     void patchUpdateUserTest() {
         // Given
         Long id = 1L;
-        UserIn patch = new UserIn();
+        PatchUserIn patch = new PatchUserIn();
         patch.setLogin("newLogin");
-
         when(userRepository.findById(id)).thenReturn(Optional.of(first));
         when(userRepository.save(any(User.class))).thenReturn(first);
-
         // When
         UserOut result = userService.patchUpdateUser(id, patch);
-
         // Then
         assertThat(result.getLogin()).isEqualTo("newLogin");
         verify(userRepository).findById(id);
@@ -122,10 +115,8 @@ class UserServiceTest {
     void deleteUserTest() {
         // Given
         when(userRepository.findById(1L)).thenReturn(Optional.of(first));
-
         // When
         userService.deleteUser(1L);
-
         // Then
         verify(userRepository).deleteById(1L);
     }
@@ -134,9 +125,8 @@ class UserServiceTest {
     void deleteUserExceptionTest() {
         // Given
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
-
         // When & Then
-        RuntimeException exception = assertThrows(RuntimeException.class,
+        RuntimeException exception = assertThrows(NoSuchElementException.class,
                 () -> userService.deleteUser(1L));
         assertThat(exception.getMessage()).isEqualTo("User not found!");
     }

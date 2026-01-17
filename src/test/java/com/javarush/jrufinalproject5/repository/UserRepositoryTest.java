@@ -19,28 +19,37 @@ public class UserRepositoryTest extends Container {
 
     @Test
     void findAllTest() {
+        // When
         List<User> all = userRepository.findAll();
+        // Then
         assertEquals(InitialDataBaseEntities.USERS, all);
     }
 
     @Test
     void findByIdTest() {
+        // When
         User user = userRepository.findById(1L).orElseThrow();
+        // Then
         assertEquals(InitialDataBaseEntities.ADMIN, user);
     }
 
     @Test
     void findByLoginTest() {
+        // When
         User admin = userRepository.findByLogin("admin").orElseThrow();
+        // Then
         assertNotNull(admin);
         assertEquals(InitialDataBaseEntities.ADMIN, admin);
     }
 
     @Test
     void saveUserTest() {
+        // Given
         User testUser = getUser("saveUserTest");
+        // When
         Long savedId = userRepository.save(testUser).getId();
         User test = userRepository.findById(savedId).orElseThrow();
+        // Then
         assertNotNull(test);
         assertEquals(testUser, test);
         List<User> list = userRepository.findAll();
@@ -50,13 +59,16 @@ public class UserRepositoryTest extends Container {
 
     @Test
     void updateUserTest() {
+        // Given
         User testUser = getUser("updateUserTest");
+        // When
         long savedId = userRepository.save(testUser).getId();
         User test = userRepository.findById(savedId).orElseThrow();
         assertNotNull(test);
         test.setLogin("login");
         test.setRole(Role.USER);
         userRepository.save(test);
+        // Then
         User user = userRepository.findById(savedId).orElseThrow();
         assertEquals("login", user.getLogin());
         assertEquals(Role.USER, user.getRole());
@@ -65,9 +77,12 @@ public class UserRepositoryTest extends Container {
 
     @Test
     void deleteUserTest() {
+        // Given
         User testUser = getUser("deleteUserTest");
+        // When
         User saved = userRepository.save(testUser);
         List<User> list = userRepository.findAll();
+        // Then
         assertNotEquals(InitialDataBaseEntities.USERS, list);
         assertEquals(InitialDataBaseEntities.USERS.size() + 1, list.size());
         deleteFromDB(saved);

@@ -1,6 +1,7 @@
 package com.javarush.jrufinalproject5.service;
 
 import com.javarush.jrufinalproject5.dto.TaskDto;
+import com.javarush.jrufinalproject5.dto.task.PatchTaskIn;
 import com.javarush.jrufinalproject5.dto.task.TaskIn;
 import com.javarush.jrufinalproject5.dto.task.TaskOut;
 import com.javarush.jrufinalproject5.entity.Task;
@@ -9,6 +10,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,13 +39,13 @@ public class TaskService {
     }
 
     public TaskOut updateTask(Long id, TaskIn task) {
-        if (task.getId() == null || !id.equals(task.getId()))
-            task.setId(id);
+        taskRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Task not found!"));
+        if (task.getId() == null || !id.equals(task.getId())) task.setId(id);
         return mapper.from(taskRepository.save(mapper.from(task)));
     }
 
-    public TaskOut patchUpdateTask(Long id, TaskIn task) {
-        Task dbTask = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found!"));
+    public TaskOut patchUpdateTask(Long id, PatchTaskIn task) {
+        Task dbTask = taskRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Task not found!"));
         if (task.getTitle() != null) {
             dbTask.setTitle(task.getTitle());
         }
@@ -59,8 +61,8 @@ public class TaskService {
         return mapper.from(taskRepository.save(dbTask));
     }
 
-    public void deleteUser(Long id) {
-        taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found!"));
+    public void deleteTask(Long id) {
+        taskRepository.findById(id).orElseThrow(() -> new NoSuchElementException("Task not found!"));
         taskRepository.deleteById(id);
     }
 }

@@ -1,14 +1,17 @@
 package com.javarush.jrufinalproject5.service;
 
 import com.javarush.jrufinalproject5.dto.UserDto;
+import com.javarush.jrufinalproject5.dto.user.PatchUserIn;
 import com.javarush.jrufinalproject5.dto.user.UserIn;
 import com.javarush.jrufinalproject5.dto.user.UserOut;
 import com.javarush.jrufinalproject5.entity.User;
 import com.javarush.jrufinalproject5.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,13 +40,13 @@ public class UserService {
     }
 
     public UserOut updateUser(Long id, UserIn user) {
-        if (user.getId() == null || !id.equals(user.getId()))
-            user.setId(id);
+        userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("User not found!"));
+        if (user.getId() == null || !id.equals(user.getId())) user.setId(id);
         return mapper.from(userRepository.save(mapper.from(user)));
     }
 
-    public UserOut patchUpdateUser(Long id, UserIn user) {
-        User dbUser = userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found!"));
+    public UserOut patchUpdateUser(Long id, PatchUserIn user) {
+        User dbUser = userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("User not found!"));
         if (user.getLogin() != null) {
             dbUser.setLogin(user.getLogin());
         }
@@ -60,7 +63,7 @@ public class UserService {
     }
 
     public void deleteUser(Long id) {
-        userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found!"));
+        userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("User not found!"));
         userRepository.deleteById(id);
     }
 }
