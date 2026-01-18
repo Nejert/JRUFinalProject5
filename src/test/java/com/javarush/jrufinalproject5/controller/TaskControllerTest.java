@@ -4,7 +4,6 @@ import com.javarush.jrufinalproject5.config.Container;
 import com.javarush.jrufinalproject5.dto.TaskDto;
 import com.javarush.jrufinalproject5.dto.task.TaskIn;
 import com.javarush.jrufinalproject5.dto.task.TaskOut;
-import com.javarush.jrufinalproject5.entity.Role;
 import com.javarush.jrufinalproject5.repository.InitialDataBaseEntities;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

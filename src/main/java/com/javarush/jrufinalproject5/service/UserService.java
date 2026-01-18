@@ -6,7 +6,6 @@ import com.javarush.jrufinalproject5.dto.user.UserIn;
 import com.javarush.jrufinalproject5.dto.user.UserOut;
 import com.javarush.jrufinalproject5.entity.User;
 import com.javarush.jrufinalproject5.repository.UserRepository;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

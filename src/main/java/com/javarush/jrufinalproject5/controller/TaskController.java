@@ -3,8 +3,6 @@ package com.javarush.jrufinalproject5.controller;
 import com.javarush.jrufinalproject5.dto.task.PatchTaskIn;
 import com.javarush.jrufinalproject5.dto.task.TaskIn;
 import com.javarush.jrufinalproject5.dto.task.TaskOut;
-import com.javarush.jrufinalproject5.dto.user.PatchUserIn;
-import com.javarush.jrufinalproject5.dto.user.UserOut;
 import com.javarush.jrufinalproject5.service.TaskService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;

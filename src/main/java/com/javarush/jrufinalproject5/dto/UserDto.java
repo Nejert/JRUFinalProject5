@@ -2,6 +2,7 @@ package com.javarush.jrufinalproject5.dto;
 
 import com.javarush.jrufinalproject5.dto.user.UserIn;
 import com.javarush.jrufinalproject5.dto.user.UserOut;
+import com.javarush.jrufinalproject5.dto.user.UserRegisterIn;
 import com.javarush.jrufinalproject5.entity.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -12,5 +13,7 @@ public interface UserDto {
     User from(UserIn userIn);
 
     UserOut from(User user);
+
+    User from(UserRegisterIn userRegisterIn);
 }
 

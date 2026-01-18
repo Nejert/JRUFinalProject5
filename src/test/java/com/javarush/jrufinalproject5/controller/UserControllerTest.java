@@ -261,7 +261,7 @@ public class UserControllerTest extends Container {
                 Role.ADMIN);
     }
 
-    private void deleteFromDB(Long id) throws Exception {
+    private void deleteFromDB(Long id) {
         mockMvc.perform(delete(URL + "/" + id))
                 .andExpect(status().isNoContent());
         mockMvc.perform(get(URL + "/" + id))
