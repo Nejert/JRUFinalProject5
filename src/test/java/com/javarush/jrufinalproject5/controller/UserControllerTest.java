@@ -6,6 +6,7 @@ import com.javarush.jrufinalproject5.dto.user.UserIn;
 import com.javarush.jrufinalproject5.dto.user.UserOut;
 import com.javarush.jrufinalproject5.entity.Role;
 import com.javarush.jrufinalproject5.repository.InitialDataBaseEntities;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +23,7 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest
+@SpringBootTest(properties = {"JWT_SECRET = 1D3GBnXCi2QRYOnVcd5+WzVt0zPnD8lo13vql3Ze6ag="})
 @AutoConfigureMockMvc
 public class UserControllerTest extends Container {
     private final static String URL = "/api/v1/users";
@@ -32,6 +33,18 @@ public class UserControllerTest extends Container {
     private UserDto mapper;
     @Autowired
     private ObjectMapper objectMapper;
+    public static final String AUTHORIZATION = "Authorization";
+    public String token;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        String resp = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"login\": \"admin\", \"password\": \"admin\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        token = "Bearer " + objectMapper.readTree(resp).get("token").asString();
+    }
 
     @Test
     void getAllUsersTest() throws Exception {
@@ -41,7 +54,7 @@ public class UserControllerTest extends Container {
                 .toList();
         String expected = objectMapper.writeValueAsString(all);
         // When & Then
-        String responseJson = mockMvc.perform(get(URL))
+        String responseJson = mockMvc.perform(get(URL).header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.*", hasSize(all.size())))
                 .andReturn().getResponse().getContentAsString();
@@ -51,7 +64,7 @@ public class UserControllerTest extends Container {
     @Test
     void getUserByIdTest() throws Exception {
         // When & Then
-        mockMvc.perform(get(URL + "/1"))
+        mockMvc.perform(get(URL + "/1").header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.login", is(InitialDataBaseEntities.ADMIN.getLogin())))
                 .andExpect(jsonPath("$.email", is(InitialDataBaseEntities.ADMIN.getEmail())));
@@ -60,7 +73,7 @@ public class UserControllerTest extends Container {
     @Test
     void notFoundUserByIdTest() throws Exception {
         // When & Then
-        mockMvc.perform(get(URL + "/-1"))
+        mockMvc.perform(get(URL + "/-1").header(AUTHORIZATION, token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code", is(HttpStatus.NOT_FOUND.value())))
                 .andExpect(jsonPath("$.messages[0]", is("No value present")));
@@ -72,6 +85,7 @@ public class UserControllerTest extends Container {
         UserIn user = getUserIn("createUserTest");
         // When
         String responseJson = mockMvc.perform(post(URL)
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isOk())
@@ -80,7 +94,7 @@ public class UserControllerTest extends Container {
                 .andReturn().getResponse().getContentAsString();
         // Then
         Long createdId = objectMapper.readValue(responseJson, UserOut.class).getId();
-        mockMvc.perform(get(URL + "/" + createdId))
+        mockMvc.perform(get(URL + "/" + createdId).header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(createdId))
                 .andExpect(jsonPath("$.login", is(user.getLogin())));
@@ -96,12 +110,13 @@ public class UserControllerTest extends Container {
         UserIn user = new UserIn(null, "x", "y", "z", null);
         // When & Then
         mockMvc.perform(post(URL)
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.messages", containsInAnyOrder(startsWith("login"), startsWith("password"), startsWith("role"), startsWith("email"))));
-        mockMvc.perform(get(URL))
+        mockMvc.perform(get(URL).header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.*", hasSize(all.size())));
     }
@@ -116,13 +131,14 @@ public class UserControllerTest extends Container {
         // When
         user.setLogin(newLogin);
         mockMvc.perform(put(URL + "/" + id)
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.login", is(user.getLogin())));
         // Then
-        mockMvc.perform(get(URL + "/" + id))
+        mockMvc.perform(get(URL + "/" + id).header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.login", is(user.getLogin())));
@@ -140,13 +156,14 @@ public class UserControllerTest extends Container {
         // When
         user.setLogin(newLogin);
         mockMvc.perform(put(URL + "/" + id)
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code", is(is(HttpStatus.BAD_REQUEST.value()))))
                 .andExpect(jsonPath("$.messages", contains(startsWith("login"))));
         // Then
-        mockMvc.perform(get(URL + "/" + id))
+        mockMvc.perform(get(URL + "/" + id).header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.login", is(oldLogin)));
@@ -159,6 +176,7 @@ public class UserControllerTest extends Container {
         UserIn user = getUserIn("notFoundUserForUpdate");
         // When & Then
         mockMvc.perform(put(URL + "/-1")
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isNotFound())
@@ -177,13 +195,14 @@ public class UserControllerTest extends Container {
         Long id = userOut.getId();
         // When
         mockMvc.perform(patch(URL + "/" + id)
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonWithNewLogin))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.login", is(newLogin)));
         // Then
-        mockMvc.perform(get(URL + "/" + id))
+        mockMvc.perform(get(URL + "/" + id).header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.login", is(newLogin)));
@@ -201,13 +220,14 @@ public class UserControllerTest extends Container {
         Long id = userOut.getId();
         // When
         mockMvc.perform(patch(URL + "/" + id)
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonWithNewLogin))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code", is(is(HttpStatus.BAD_REQUEST.value()))))
                 .andExpect(jsonPath("$.messages", contains(startsWith("login"))));
         // Then
-        mockMvc.perform(get(URL + "/" + id))
+        mockMvc.perform(get(URL + "/" + id).header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.login", is(oldLogin)));
@@ -218,6 +238,7 @@ public class UserControllerTest extends Container {
     void notFoundUserForPatchUpdate() throws Exception {
         // When & Then
         mockMvc.perform(patch(URL + "/-1")
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isNotFound())
@@ -237,7 +258,7 @@ public class UserControllerTest extends Container {
     @Test
     void notFoundUserForDeleteTest() throws Exception {
         // When & Then
-        mockMvc.perform(delete(URL + "/-1"))
+        mockMvc.perform(delete(URL + "/-1").header(AUTHORIZATION, token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code", is(HttpStatus.NOT_FOUND.value())))
                 .andExpect(jsonPath("$.messages[0]", is("User not found!")));
@@ -245,6 +266,7 @@ public class UserControllerTest extends Container {
 
     private UserOut createUser(UserIn userIn) throws Exception {
         String responseJson = mockMvc.perform(post(URL)
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userIn)))
                 .andExpect(status().isOk())
@@ -261,10 +283,10 @@ public class UserControllerTest extends Container {
                 Role.ADMIN);
     }
 
-    private void deleteFromDB(Long id) {
-        mockMvc.perform(delete(URL + "/" + id))
+    private void deleteFromDB(Long id) throws Exception {
+        mockMvc.perform(delete(URL + "/" + id).header(AUTHORIZATION, token))
                 .andExpect(status().isNoContent());
-        mockMvc.perform(get(URL + "/" + id))
+        mockMvc.perform(get(URL + "/" + id).header(AUTHORIZATION, token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code", is(HttpStatus.NOT_FOUND.value())))
                 .andExpect(jsonPath("$.messages[0]", is("No value present")));

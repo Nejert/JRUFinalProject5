@@ -5,6 +5,8 @@ import com.javarush.jrufinalproject5.dto.TaskDto;
 import com.javarush.jrufinalproject5.dto.task.TaskIn;
 import com.javarush.jrufinalproject5.dto.task.TaskOut;
 import com.javarush.jrufinalproject5.repository.InitialDataBaseEntities;
+import com.javarush.jrufinalproject5.security.JwtUtils;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,7 +25,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest
+
+@SpringBootTest(properties = {"JWT_SECRET = 1D3GBnXCi2QRYOnVcd5+WzVt0zPnD8lo13vql3Ze6ag="})
 @AutoConfigureMockMvc
 public class TaskControllerTest extends Container {
     private final static String URL = "/api/v1/tasks";
@@ -33,6 +36,18 @@ public class TaskControllerTest extends Container {
     private TaskDto mapper;
     @Autowired
     private ObjectMapper objectMapper;
+    public static final String AUTHORIZATION = "Authorization";
+    public String token;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        String resp = mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"login\": \"admin\", \"password\": \"admin\"}"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        token = "Bearer " + objectMapper.readTree(resp).get("token").asString();
+    }
 
     @Test
     void getAllTasksTest() throws Exception {
@@ -42,7 +57,7 @@ public class TaskControllerTest extends Container {
                 .toList();
         String expected = objectMapper.writeValueAsString(all);
         // When & Then
-        String responseJson = mockMvc.perform(get(URL))
+        String responseJson = mockMvc.perform(get(URL).header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.*", hasSize(all.size())))
                 .andReturn().getResponse().getContentAsString();
@@ -52,7 +67,7 @@ public class TaskControllerTest extends Container {
     @Test
     void getTaskByIdTest() throws Exception {
         // When & Then
-        mockMvc.perform(get(URL + "/1"))
+        mockMvc.perform(get(URL + "/1").header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title", is(InitialDataBaseEntities.HOMEWORK.getTitle())))
                 .andExpect(jsonPath("$.description", is(InitialDataBaseEntities.HOMEWORK.getDescription())));
@@ -61,7 +76,7 @@ public class TaskControllerTest extends Container {
     @Test
     void notFoundTaskByIdTest() throws Exception {
         // When & Then
-        mockMvc.perform(get(URL + "/-1"))
+        mockMvc.perform(get(URL + "/-1").header(AUTHORIZATION, token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code", is(HttpStatus.NOT_FOUND.value())))
                 .andExpect(jsonPath("$.messages[0]", is("No value present")));
@@ -73,6 +88,7 @@ public class TaskControllerTest extends Container {
         TaskIn task = getTaskIn("createTaskTest");
         // When
         String responseJson = mockMvc.perform(post(URL)
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(task)))
                 .andExpect(status().isOk())
@@ -81,7 +97,7 @@ public class TaskControllerTest extends Container {
                 .andReturn().getResponse().getContentAsString();
         // Then
         Long createdId = objectMapper.readValue(responseJson, TaskOut.class).getId();
-        mockMvc.perform(get(URL + "/" + createdId))
+        mockMvc.perform(get(URL + "/" + createdId).header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(createdId))
                 .andExpect(jsonPath("$.title", is(task.getTitle())));
@@ -97,12 +113,13 @@ public class TaskControllerTest extends Container {
         TaskIn task = new TaskIn(null, "x", null, null, null, null);
         // When & Then
         mockMvc.perform(post(URL)
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(task)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code", is(HttpStatus.BAD_REQUEST.value())))
                 .andExpect(jsonPath("$.messages", containsInAnyOrder(startsWith("title"), startsWith("description"))));
-        mockMvc.perform(get(URL))
+        mockMvc.perform(get(URL).header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.*", hasSize(all.size())));
     }
@@ -117,13 +134,14 @@ public class TaskControllerTest extends Container {
         // When
         task.setTitle(newTitle);
         mockMvc.perform(put(URL + "/" + id)
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(task)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.title", is(task.getTitle())));
         // Then
-        mockMvc.perform(get(URL + "/" + id))
+        mockMvc.perform(get(URL + "/" + id).header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.title", is(task.getTitle())));
@@ -141,13 +159,14 @@ public class TaskControllerTest extends Container {
         // When
         task.setTitle(newTitle);
         mockMvc.perform(put(URL + "/" + id)
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(task)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code", is(is(HttpStatus.BAD_REQUEST.value()))))
                 .andExpect(jsonPath("$.messages", contains(startsWith("title"))));
         // Then
-        mockMvc.perform(get(URL + "/" + id))
+        mockMvc.perform(get(URL + "/" + id).header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.title", is(oldTitle)));
@@ -159,6 +178,7 @@ public class TaskControllerTest extends Container {
         TaskIn task = getTaskIn("notFoundTaskForUpdate");
         // When & Then
         mockMvc.perform(put(URL + "/-1")
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(task)))
                 .andExpect(status().isNotFound())
@@ -177,13 +197,14 @@ public class TaskControllerTest extends Container {
         Long id = taskOut.getId();
         // When
         mockMvc.perform(patch(URL + "/" + id)
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonWithNewTitle))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.title", is(newTitle)));
         // Then
-        mockMvc.perform(get(URL + "/" + id))
+        mockMvc.perform(get(URL + "/" + id).header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.title", is(newTitle)));
@@ -201,13 +222,14 @@ public class TaskControllerTest extends Container {
         Long id = taskOut.getId();
         // When
         mockMvc.perform(patch(URL + "/" + id)
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonWithNewTitle))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code", is(is(HttpStatus.BAD_REQUEST.value()))))
                 .andExpect(jsonPath("$.messages", contains(startsWith("title"))));
         // Then
-        mockMvc.perform(get(URL + "/" + id))
+        mockMvc.perform(get(URL + "/" + id).header(AUTHORIZATION, token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.title", is(oldTitle)));
@@ -218,6 +240,7 @@ public class TaskControllerTest extends Container {
     void notFoundTaskForPatchUpdate() throws Exception {
         // When & Then
         mockMvc.perform(patch(URL + "/-1")
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isNotFound())
@@ -237,7 +260,7 @@ public class TaskControllerTest extends Container {
     @Test
     void notFoundTaskForDeleteTest() throws Exception {
         // When & Then
-        mockMvc.perform(delete(URL + "/-1"))
+        mockMvc.perform(delete(URL + "/-1").header(AUTHORIZATION, token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code", is(HttpStatus.NOT_FOUND.value())))
                 .andExpect(jsonPath("$.messages[0]", is("Task not found!")));
@@ -254,6 +277,7 @@ public class TaskControllerTest extends Container {
 
     private TaskOut createTask(TaskIn taskInIn) throws Exception {
         String responseJson = mockMvc.perform(post(URL)
+                        .header(AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(taskInIn)))
                 .andExpect(status().isOk())
@@ -262,9 +286,9 @@ public class TaskControllerTest extends Container {
     }
 
     private void deleteFromDB(Long id) throws Exception {
-        mockMvc.perform(delete(URL + "/" + id))
+        mockMvc.perform(delete(URL + "/" + id).header(AUTHORIZATION, token))
                 .andExpect(status().isNoContent());
-        mockMvc.perform(get(URL + "/" + id))
+        mockMvc.perform(get(URL + "/" + id).header(AUTHORIZATION, token))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code", is(HttpStatus.NOT_FOUND.value())))
                 .andExpect(jsonPath("$.messages[0]", is("No value present")));

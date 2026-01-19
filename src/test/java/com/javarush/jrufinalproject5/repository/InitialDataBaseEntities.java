@@ -9,10 +9,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class InitialDataBaseEntities {
-    public static final User ADMIN = new User(1L, "admin", "admin", "admin@admin.com", Role.ADMIN, null);
-    public static final User USER = new User(2L, "user", "user", "user@user.com", Role.USER, null);
-    public static final User TEST = new User(3L, "test", "test", "test@test.com", Role.USER, null);
-    public static final User SOME = new User(4L, "some", "some", "some@some.com", Role.USER, null);
+    public static final User ADMIN = new User(1L, "admin", "{bcrypt}$2a$10$RmrxrQABnN6uCjoBTOICk.5CkzizQLcIzWwh9mb1H.ugKSqQxcYby", "admin@admin.com", Role.ADMIN, null);
+    public static final User USER = new User(2L, "user", "{bcrypt}$2a$10$MlpaqynuPw3k0p.TuzfPlefiwlATIEEZ74gsoCszEOypRcoKP84XK", "user@user.com", Role.USER, null);
+    public static final User TEST = new User(3L, "test", "{bcrypt}$2a$10$auYEuo2zoTQfZXLLidvIPedHfVbpWwOIvR7esxzyzjqiOguAVF4lq", "test@test.com", Role.USER, null);
+    public static final User SOME = new User(4L, "some", "{bcrypt}$2a$10$B4NeqjM8bdkRzySnBlpT..ckyeDQe1zJnuTCsB6EA5tANI49/r.Pe", "some@some.com", Role.USER, null);
 
     public static final Task HOMEWORK = new Task(
             1L,
