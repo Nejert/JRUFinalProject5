@@ -1,0 +1,14 @@
+scrape_configs:
+  - job_name: 'spring-boot-app'
+    metrics_path: /actuator/prometheus
+    oauth2:
+      client_id: 'admin'
+      token_url: 'http://host.docker.internal:8080/api/v1/auth/monitoring'
+      endpoint_params:
+        login: admin
+        password: admin
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ 'host.docker.internal:8080' ]
+        labels:
+          service: 'JRUFinalProject5'

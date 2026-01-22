@@ -12,7 +12,6 @@ management:
       exposure:
         include: "*"
 logging:
-#  level.org.springframework: DEBUG
-  level.org.springframework.web: DEBUG
+  level.org.springframework: INFO
 jwt:
   secret: ${JWT_SECRET}
