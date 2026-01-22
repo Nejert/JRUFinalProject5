@@ -1,5 +1,6 @@
 package com.javarush.jrufinalproject5.config;
 
+import com.javarush.jrufinalproject5.entity.Role;
 import com.javarush.jrufinalproject5.security.JwtFilter;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,7 +26,8 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**", "/actuator/health").permitAll()
+                        .requestMatchers("/actuator/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
