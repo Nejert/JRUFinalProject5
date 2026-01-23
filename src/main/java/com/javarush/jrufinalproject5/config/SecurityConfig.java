@@ -2,6 +2,10 @@ package com.javarush.jrufinalproject5.config;
 
 import com.javarush.jrufinalproject5.entity.Role;
 import com.javarush.jrufinalproject5.security.JwtFilter;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @AllArgsConstructor
 public class SecurityConfig {
-    private  JwtFilter jwtFilter;
+    private JwtFilter jwtFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
@@ -26,7 +30,11 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/**", "/actuator/health").permitAll()
+                        .requestMatchers(
+                                "/api/v1/auth/**",
+                                "/actuator/health",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**").permitAll()
                         .requestMatchers("/actuator/**").hasRole(Role.ADMIN.name())
                         .anyRequest().authenticated()
                 )
@@ -42,5 +50,19 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    private SecurityScheme createAPIKeyScheme() {
+        return new SecurityScheme().type(SecurityScheme.Type.HTTP)
+                .bearerFormat("JWT")
+                .scheme("bearer");
+    }
+
+    @Bean
+    public OpenAPI openAPI() {
+        return new OpenAPI().addSecurityItem(new SecurityRequirement().
+                        addList("Bearer Authentication"))
+                .components(new Components().addSecuritySchemes
+                        ("Bearer Authentication", createAPIKeyScheme()));
     }
 }

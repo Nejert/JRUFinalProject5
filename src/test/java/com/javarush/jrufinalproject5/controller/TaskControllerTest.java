@@ -5,7 +5,6 @@ import com.javarush.jrufinalproject5.dto.TaskDto;
 import com.javarush.jrufinalproject5.dto.task.TaskIn;
 import com.javarush.jrufinalproject5.dto.task.TaskOut;
 import com.javarush.jrufinalproject5.repository.InitialDataBaseEntities;
-import com.javarush.jrufinalproject5.security.JwtUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,6 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 
 @SpringBootTest(properties = {"JWT_SECRET = 1D3GBnXCi2QRYOnVcd5+WzVt0zPnD8lo13vql3Ze6ag="})
 @AutoConfigureMockMvc

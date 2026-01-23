@@ -8,6 +8,7 @@ import com.javarush.jrufinalproject5.entity.User;
 import com.javarush.jrufinalproject5.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class UserService {
     private final UserRepository userRepository;
     private final UserDto mapper;

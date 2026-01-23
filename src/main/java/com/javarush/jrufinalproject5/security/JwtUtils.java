@@ -13,7 +13,7 @@ import java.util.Date;
 public class JwtUtils {
     @Value("${jwt.secret}")
     private String secret;
-    private final long expiration = 24 * 60 * 60 * 1000;
+    public static final long EXPIRATION = 24 * 60 * 60 * 1000;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
@@ -24,7 +24,7 @@ public class JwtUtils {
         return Jwts.builder()
                 .subject(login)
                 .issuedAt(start)
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .expiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(getSigningKey())
                 .compact();
 
