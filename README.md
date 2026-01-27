@@ -15,6 +15,7 @@
 - **Centralized Logging**: ELK Stack integration for system-wide log analysis.
 - **Monitoring**: Real-time application health tracking via Spring Boot Actuator.
 - **Containerization**: Full Docker and Docker Compose support for instant deployment.
+- **CI/CD Ready**: Configured pipeline for automated building and testing.
 
 ---
 ## 🛠 Tech Stack
