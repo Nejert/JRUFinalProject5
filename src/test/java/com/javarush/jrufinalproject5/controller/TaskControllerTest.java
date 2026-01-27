@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(properties = {"JWT_SECRET = 1D3GBnXCi2QRYOnVcd5+WzVt0zPnD8lo13vql3Ze6ag="})
+@SpringBootTest
 @AutoConfigureMockMvc
 public class TaskControllerTest extends Container {
     private final static String URL = "/api/v1/tasks";

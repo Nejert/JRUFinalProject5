@@ -42,11 +42,12 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> register(@RequestBody @Valid UserRegisterIn user) {
-        String token = authService.registerUser(user);
+    public ResponseEntity<Map<String, Object>> register(@RequestBody @Valid UserRegisterIn user) {
+        Map<String, Object> userToken = authService.registerUser(user);
         return ResponseEntity.ok(new HashMap<>() {{
             put("message", "User '%s' has been successfully registered!".formatted(user.getLogin()));
-            put("token", token);
+            put("user_id", userToken.get("user_id"));
+            put("token", userToken.get("token"));
         }});
     }
 }

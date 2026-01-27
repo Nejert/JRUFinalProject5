@@ -44,8 +44,9 @@ public class TaskServiceTest {
 
     @BeforeEach
     void setUp() {
-        first = InitialDataBaseEntities.HOMEWORK;
-        second = InitialDataBaseEntities.SERVER;
+
+        first = InitialDataBaseEntities.getClone(InitialDataBaseEntities.HOMEWORK);
+        second = InitialDataBaseEntities.getClone(InitialDataBaseEntities.SERVER);
         firstOut = new TaskOut(first.getId(), first.getTitle(), first.getDescription(), first.getDeadline(), first.getStatus(), first.getUser().getId());
         secondOut = new TaskOut(second.getId(), second.getTitle(), second.getDescription(), second.getDeadline(), second.getStatus(), second.getUser().getId());
         thirdIn = new TaskIn(
@@ -113,14 +114,25 @@ public class TaskServiceTest {
         Long id = 1L;
         PatchTaskIn patch = new PatchTaskIn();
         patch.setTitle("newTitle");
-        firstOut.setTitle(patch.getTitle());
+        patch.setDescription("newDescription");
+        patch.setStatus("newStatus");
+        TaskOut expected = new TaskOut(
+                firstOut.getId(),
+                patch.getTitle(),
+                patch.getDescription(),
+                first.getDeadline(),
+                patch.getStatus(),
+                firstOut.getUserId()
+                );
         when(taskRepository.findById(id)).thenReturn(Optional.of(first));
         when(taskRepository.save(any(Task.class))).thenReturn(first);
-        when(mapper.from(any(Task.class))).thenReturn(firstOut);
+        when(mapper.from(any(Task.class))).thenReturn(expected);
         // When
         TaskOut result = taskService.patchUpdateTask(id, patch);
         // Then
-        assertThat(result.getTitle()).isEqualTo("newTitle");
+        assertThat(result.getTitle()).isEqualTo(patch.getTitle());
+        assertThat(result.getDescription()).isEqualTo(patch.getDescription());
+        assertThat(result.getStatus()).isEqualTo(patch.getStatus());
         verify(taskRepository).findById(id);
     }
 

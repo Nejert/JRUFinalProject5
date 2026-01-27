@@ -15,6 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 @AllArgsConstructor
 @Transactional
@@ -25,7 +28,7 @@ public class AuthService {
     private UserDto mapper;
     private PasswordEncoder passwordEncoder;
 
-    public String registerUser(UserRegisterIn user) {
+    public Map<String, Object> registerUser(UserRegisterIn user) {
         User newUser = mapper.from(user);
         userRepository.findByLogin(newUser.getLogin()).ifPresent(user1 -> {
             throw new EntityExistsException("User '" + user.getLogin() + "' already exists");
@@ -36,7 +39,10 @@ public class AuthService {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(newUser.getLogin(), user.getPassword())
         );
-        return jwtUtils.generateToken(newUser.getLogin());
+        return new HashMap<>(){{
+            put("user_id", newUser.getId());
+            put("token", jwtUtils.generateToken(newUser.getLogin()));
+        }};
     }
 
     public String login(UserLogIn user) {

@@ -6,6 +6,8 @@ import com.javarush.jrufinalproject5.entity.Task;
 import com.javarush.jrufinalproject5.entity.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class InitialDataBaseEntities {
@@ -35,5 +37,15 @@ public class InitialDataBaseEntities {
         USER.setTasks(List.of(SERVER));
         USERS = List.of(ADMIN, USER, TEST, SOME);
         TASKS = List.of(HOMEWORK, SERVER);
+    }
+
+    public static User getClone(User user){
+        List<Task> tasksCopy = new ArrayList<>();
+        Collections.copy(user.getTasks(), tasksCopy);
+        return new User(user.getId(), user.getLogin(), user.getPassword(), user.getEmail(), user.getRole(), tasksCopy);
+    }
+
+    public static Task getClone(Task task){
+        return new Task(task.getId(), task.getTitle(), task.getDescription(), task.getDeadline(), task.getStatus(), getClone(task.getUser()));
     }
 }

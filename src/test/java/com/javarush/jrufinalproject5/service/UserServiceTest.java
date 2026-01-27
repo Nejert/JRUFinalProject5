@@ -41,8 +41,8 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         userService = new UserService(userRepository, mapper);
-        first = InitialDataBaseEntities.ADMIN;
-        second = InitialDataBaseEntities.USER;
+        first = InitialDataBaseEntities.getClone(InitialDataBaseEntities.ADMIN);
+        second = InitialDataBaseEntities.getClone(InitialDataBaseEntities.USER);
         firstOut = mapper.from(first);
         secondOut = mapper.from(second);
         thirdIn = new UserIn(null, "newUser", "newUser", "test@user.com", Role.USER);
@@ -102,12 +102,16 @@ class UserServiceTest {
         Long id = 1L;
         PatchUserIn patch = new PatchUserIn();
         patch.setLogin("newLogin");
+        patch.setEmail("new@email.com");
+        patch.setRole(Role.ADMIN);
         when(userRepository.findById(id)).thenReturn(Optional.of(first));
         when(userRepository.save(any(User.class))).thenReturn(first);
         // When
         UserOut result = userService.patchUpdateUser(id, patch);
         // Then
-        assertThat(result.getLogin()).isEqualTo("newLogin");
+        assertThat(result.getLogin()).isEqualTo(patch.getLogin());
+        assertThat(result.getEmail()).isEqualTo(patch.getEmail());
+        assertThat(result.getRole()).isEqualTo(patch.getRole());
         verify(userRepository).findById(id);
     }
 

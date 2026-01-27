@@ -23,10 +23,10 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(properties = {"JWT_SECRET = 1D3GBnXCi2QRYOnVcd5+WzVt0zPnD8lo13vql3Ze6ag="})
+@SpringBootTest
 @AutoConfigureMockMvc
 public class UserControllerTest extends Container {
-    private final static String URL = "/api/v1/users";
+    public final static String URL = "/api/v1/users";
     @Autowired
     private MockMvc mockMvc;
     @Autowired
