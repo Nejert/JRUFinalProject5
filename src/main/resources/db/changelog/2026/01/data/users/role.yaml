@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: insert-users-roles
+      author: ikazakov
+      changes:
+        - insert:
+            tableName: role
+            columns:
+              - column:
+                  name: role
+                  value: ADMIN
+        - insert:
+            tableName: role
+            columns:
+              - column:
+                  name: role
+                  value: USER
+

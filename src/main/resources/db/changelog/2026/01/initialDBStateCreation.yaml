@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - include:
+      file: tables/createTables.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: connections/createConnections.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: data/addInitialData.yaml
+      relativeToChangelogFile: true

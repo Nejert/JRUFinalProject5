@@ -1,0 +1,71 @@
+services:
+  app:
+    build: .
+    container_name: jru5
+    environment:
+      jwt.secret: 1D3GBnXCi2QRYOnVcd5+WzVt0zPnD8lo13vql3Ze6ag=
+      spring.datasource.url: jdbc:postgresql://host.docker.internal:5432/project
+    depends_on:
+      - postgres
+    ports:
+      - "8080:8080"
+  postgres:
+    image: postgres
+    container_name: jru5-postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: project
+    ports:
+      - "5432:5432"
+  prometheus:
+    image: prom/prometheus
+    container_name: jru5-prometheus
+    depends_on:
+      - app
+    ports:
+      - "9090:9090"
+    volumes:
+      - .cfg/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  grafana:
+    image: grafana/grafana
+    container_name: jru5-grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    volumes:
+      - .cfg/grafana/grafana.db:/var/lib/grafana/grafana.db
+  elasticsearch:
+    image: elasticsearch:9.2.4
+    container_name: jru5-elasticsearch
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: false
+    depends_on:
+      - app
+    ports:
+      - "9200:9200"
+  logstash:
+    image: logstash:9.2.4
+    container_name: jru5-logstash
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: false
+    depends_on:
+      - elasticsearch
+      - app
+    ports:
+      - "5044:5044"
+    volumes:
+      - .cfg/logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+  kibana:
+    image: kibana:9.2.4
+    container_name: jru5-kibana
+    environment:
+      ELASTICSEARCH_HOSTS: http://host.docker.internal:9200
+    depends_on:
+      - elasticsearch
+      - logstash
+    ports:
+      - "5601:5601"

@@ -1,0 +1,36 @@
+databaseChangeLog:
+  - changeSet:
+      id: createTable-tasks
+      author: ikazakov
+      changes:
+        - createTable:
+            tableName: tasks
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: task_pkey
+              - column:
+                  name: title
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: description
+                  type: clob
+                  constraints:
+                    nullable: false
+              - column:
+                  name: deadline
+                  type: timestamp
+              - column:
+                  name: status
+                  type: varchar(20)
+              - column:
+                  name: user_id
+                  type: bigint
